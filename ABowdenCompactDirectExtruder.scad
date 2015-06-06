@@ -1,14 +1,7 @@
 // Compact direct drive bowden extruder for 1.75mm filament
 // Licence: CC BY-SA 3.0, http://creativecommons.org/licenses/by-sa/3.0/
-// Author: Dominik Scholz <schlotzz@schlotzz.com> and contributors
-// Using MK8 style hobbed pulley 13x8mm from: https://www.reprapsource.com/en/show/6889
-// visit: http://www.schlotzz.com
-// changed: 2014-04-04, added idler slot and funnel on bowden side for easier filament insertion
-// changed: 2014-04-27, placed base and idler "printer ready"
-// changed: 2014-09-22, fixed non-manifold vertexes between base and filament tunnel
-// changed: 2014-11-13, added bowden inlet
-// changed: 2015-03-17, updated idler for better MK7 drive gear support
-
+// Contributing author: Chandler Wall <c@swall.us>
+// Original Author: Dominik Scholz <schlotzz@schlotzz.com> and contributors
 
 /*
 	design goals:
