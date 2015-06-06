@@ -26,24 +26,25 @@ m3_wide_radius = m3_major / 2 + extra_radius + 0.2;
 m3_head_radius = 3 + extra_radius;
 
 // drive gear
-drive_gear_outer_radius = 8.00 / 2;
-drive_gear_hobbed_radius = 6.35 / 2;
-drive_gear_hobbed_offset = 3.2;
-drive_gear_length = 13;
+drive_gear_outer_radius = 8.5 / 2;
+drive_gear_hobbed_radius = 7.5 / 2;
+drive_gear_hobbed_offset = 3.5; // 3.2 originally
+drive_gear_length = 11;
 drive_gear_tooth_depth = 0.2;
 
 // base width for frame plate
-base_width = 15;
+base_width = 20; // 15 originally
 base_length = 60;
-base_height = 5;
+base_height = 7; // 5 originally
+base_m3_height = 4.5; // this value establishes the height of each m3 head
 
 // nema 17 dimensions
 nema17_width = 42.3;
 nema17_hole_offsets = [
-	[-15.5, -15.5, 1.5],
-	[-15.5,  15.5, 1.5],
-	[ 15.5, -15.5, 1.5],
-	[ 15.5,  15.5, 1.5 + base_height]
+	[-15.5, -15.5, base_m3_height],
+	[-15.5,  15.5, base_m3_height],
+	[ 15.5, -15.5, base_m3_height],
+	[ 15.5,  15.5, base_m3_height + base_height]
 ];
 
 // inlet type
@@ -51,16 +52,12 @@ inlet_type = 0; // 0:normal, 1:push-fit
 
 
 //// filament
-filament_diameter = 1.75; // 1.75, 3.00
+filament_diameter = 3; // 1.75, 3.00
 filament_offset = [
 	drive_gear_hobbed_radius + filament_diameter / 2 - drive_gear_tooth_depth,
 	0,
 	base_height + drive_gear_length - drive_gear_hobbed_offset - 2.5
 ];
-
-
-
-
 
 // helper function to render a rounded slot
 module rounded_slot(r = 1, h = 1, l = 0, center = false)
@@ -73,8 +70,6 @@ module rounded_slot(r = 1, h = 1, l = 0, center = false)
 			cylinder(r = r, h = h, center = center);
 	}
 }
-
-
 
 // mounting plate for nema 17
 module nema17_mount()
@@ -96,7 +91,7 @@ module nema17_mount()
 			}
 		
 		// center hole
-		translate([0, 0, -epsilon]	)
+		#translate([0, 0, -epsilon]	)
 			cylinder(r = 11.25 + extra_radius, h = base_height + 2 * epsilon, $fn = 32);
 
 		// axle hole
@@ -108,11 +103,10 @@ module nema17_mount()
 			translate(a)
 			{
 				cylinder(r = m3_radius, h = height * 4, center = true, $fn = 16);
-				cylinder(r = m3_head_radius, h = height + epsilon, $fn = 16);
+				cylinder(r = m3_head_radius, h = (height - base_m3_height) + epsilon, $fn = 16);
 			}
 	}
 }
-
 
 // plate for mounting extruder on frame
 module frame_mount()
@@ -122,8 +116,8 @@ module frame_mount()
 	length = base_length;
 	height = base_height;
 	hole_offsets = [
-		[0,  length / 2 - 6, 2.5],
-		[0, -length / 2 + 6, 2.5]
+		[-3,  length / 2 - 7, 2.5],
+		[-3, -length / 2 + 7, 2.5]
 	];
 	corner_radius = 3;
 
@@ -155,7 +149,7 @@ module frame_mount()
 			translate(a)
 			{
 				cylinder(r = m3_wide_radius, h = height * 2 + 2 * epsilon, center = true, $fn = 16);
-				cylinder(r = m3_head_radius, h = height + epsilon, $fn = 16);
+				#cylinder(r = m3_head_radius, h = (height + base_m3_height) + epsilon, $fn = 16);
 			}
 
 		// nema17 mounting holes
@@ -169,7 +163,6 @@ module frame_mount()
 				}
 	}
 }
-
 
 // inlet for filament
 module filament_tunnel()
@@ -281,12 +274,11 @@ module filament_tunnel()
 						h = length + 2 * epsilon, center = true, $fn = 16);
 			
 			// screw head inlet
-			translate(nema17_hole_offsets[2] - [filament_offset[0], 0, height / 2 + 1.5])
+			#translate(nema17_hole_offsets[2] - [filament_offset[0], 0, height / 2 + base_m3_height])
 				sphere(r = m3_head_radius, $fn = 16);
 		}
 	}
 }
-
 
 // render drive gear
 module drive_gear()
@@ -303,7 +295,6 @@ module drive_gear()
 	}
 }
 
-
 // render 608zz
 module bearing_608zz()
 {
@@ -314,7 +305,6 @@ module bearing_608zz()
 	}
 }
 
-
 // render 624zz
 module bearing_624zz()
 {
@@ -324,7 +314,6 @@ module bearing_624zz()
 		cylinder(r = 2, h = 5 + 2 * epsilon, center = true, $fn = 16);
 	}
 }
-
 
 // idler with 608 bearing
 module idler_608()
@@ -404,8 +393,6 @@ module idler_608()
 		%bearing_608zz();
 }
 
-
-
 module compact_extruder()
 {
 	// motor plate
@@ -435,3 +422,4 @@ module compact_extruder()
 compact_extruder();
 translate([20, 0, 0])
 	idler_608();
+	
