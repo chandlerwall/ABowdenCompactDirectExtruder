@@ -1,4 +1,5 @@
 // Compact direct drive bowden extruder for 1.75mm filament
+// Original source obtained from https://www.thingiverse.com/thing:275593 on 6/5/15
 // Licence: CC BY-SA 3.0, http://creativecommons.org/licenses/by-sa/3.0/
 // Contributing author: Chandler Wall <c@swall.us>
 // Original Author: Dominik Scholz <schlotzz@schlotzz.com> and contributors
@@ -42,7 +43,7 @@ base_m3_height = 4.5; // this value establishes the height of each m3 head
 nema17_width = 42.3;
 nema17_hole_offsets = [
 	[-15.5, -15.5, base_m3_height],
-	[-15.5,  15.5, base_m3_height],
+	[-15.5,  15.5, base_m3_height + base_height],
 	[ 15.5, -15.5, base_m3_height],
 	[ 15.5,  15.5, base_m3_height + base_height]
 ];
@@ -91,7 +92,7 @@ module nema17_mount()
 			}
 		
 		// center hole
-		#translate([0, 0, -epsilon]	)
+		translate([0, 0, -epsilon]	)
 			cylinder(r = 11.25 + extra_radius, h = base_height + 2 * epsilon, $fn = 32);
 
 		// axle hole
@@ -149,7 +150,7 @@ module frame_mount()
 			translate(a)
 			{
 				cylinder(r = m3_wide_radius, h = height * 2 + 2 * epsilon, center = true, $fn = 16);
-				#cylinder(r = m3_head_radius, h = (height + base_m3_height) + epsilon, $fn = 16);
+				cylinder(r = m3_head_radius, h = (height + base_m3_height) + epsilon, $fn = 16);
 			}
 
 		// nema17 mounting holes
@@ -176,11 +177,12 @@ module filament_tunnel()
 	{
 		difference()
 		{
+			color("blue")
 			union()
 			{
 				// base
-				translate([-height / 2, 0, 0])
-					cube([width + height, length, height], center = true);
+				translate([-height / 2, -length / 4, 0])
+					cube([width + height, length / 2, height], center = true);
 
 				// inlet strengthening
 				translate([0, -length / 2, -height / 2 + filament_offset[2] - base_height])
@@ -188,6 +190,7 @@ module filament_tunnel()
 						cylinder(r = 3.5, h = 1, center = true, $fn = 32);
 
 				// outlet strengthening
+				%color("teal")
 				translate([0, length / 2, -height / 2 + filament_offset[2] - base_height])
 					rotate([90, 0, 0])
 						cylinder(r = 3.5, h = 1, center = true, $fn = 32);
@@ -274,7 +277,7 @@ module filament_tunnel()
 						h = length + 2 * epsilon, center = true, $fn = 16);
 			
 			// screw head inlet
-			#translate(nema17_hole_offsets[2] - [filament_offset[0], 0, height / 2 + base_m3_height])
+			translate(nema17_hole_offsets[2] - [filament_offset[0], 0, height / 2 + base_m3_height])
 				sphere(r = m3_head_radius, $fn = 16);
 		}
 	}
@@ -413,7 +416,7 @@ module compact_extruder()
 			drive_gear();
 
 	// filament
-	color("red")
+	color("orange")
 		%translate(filament_offset - [0, 0, epsilon])
 			rotate([90, 0, 0])
 				cylinder(r = filament_diameter / 2, h = 100, $fn = 16, center = true);
