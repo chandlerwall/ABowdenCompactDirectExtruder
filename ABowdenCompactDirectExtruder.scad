@@ -51,6 +51,9 @@ nema17_hole_offsets = [
 // inlet type
 inlet_type = 0; // 0:normal, 1:push-fit
 
+// bowden
+bowden_outer_diameter = 4;
+bowden_inner_idameter = 2;
 
 //// filament
 filament_diameter = 3; // 1.75, 3.00
@@ -396,6 +399,84 @@ module idler_608()
 		%bearing_608zz();
 }
 
+module clamp_bowden()
+{
+	// settings
+	width = nema17_width;
+	height = filament_offset[2] - base_height + 4;
+	edge_radius = 27;
+	hole_offsets = [-width / 2 + 4, width / 2 - 4];
+	bearing_bottom = filament_offset[2] / 2 - base_height / 2 - 6;
+	offset = drive_gear_hobbed_radius - drive_gear_tooth_depth + filament_diameter;
+	pre_tension = 0.25;
+	gap = 1;
+
+	// base plate
+	translate([0, 0, height / 2])
+	difference()
+	{
+		color("purple")
+		union()
+		{
+			// base
+			intersection()
+			{
+				cube([width, width, height], center = true);
+				translate([0, 0, 0])
+					cylinder(r = edge_radius, h = height + 2 * epsilon, $fn = 128, center = true);
+				translate([offset + 10.65 + gap, 0, 0])
+					cube([15, nema17_width + epsilon, height], center = true);
+			}
+			
+			// bearing foot enforcement
+			translate([offset + 11 - pre_tension, 0, -height / 2])
+				cylinder(r = 4 - extra_radius + 1, h = height - .5, $fn = 32);
+			
+			// spring base enforcement
+			translate([17.15, -nema17_width / 2 + 4, .25])
+				rotate([0, 90, 0])
+					cylinder(r = 3.75, h = 4, $fn = 32);
+		}
+
+		translate([offset + 11 - pre_tension, 0, bearing_bottom])
+			difference()
+			{
+				// bearing spare out
+				cylinder(r = 11.5, h = 60, $fn = 32);
+				
+				// bearing mount
+				cylinder(r = 4 - extra_radius, h = 7.5, $fn = 32);
+				
+				// bearing mount base
+				cylinder(r = 4 - extra_radius + 1, h = 0.5, $fn = 32);
+			}
+
+		// bearing mount hole
+		translate([offset + 11 - pre_tension, 0, 0])
+			cylinder(r = 2.5, h = 50, center = true, $fn = 32);
+
+		// tensioner bolt slot
+		translate([17.15, -nema17_width / 2 + 4, .25])
+			rotate([0, 90, 0])
+				rounded_slot(r = m3_wide_radius, h = 50, l = 1.5, center = true, $fn = 32);
+
+		// fastener cutout
+		translate([offset - 18.85 + gap, -20 ,0])
+			cylinder(r = 27, h = height + 2 * epsilon, center = true, $fn = 32);
+
+		// mounting hole
+		translate([15.5, 15.5, 0])
+		{
+			cylinder(r = m3_wide_radius, h = height * 4, center = true, $fn = 16);
+			cylinder(r = m3_head_radius, h = height + epsilon, $fn = 16);
+		}
+
+	}
+
+	translate([offset + 11 - pre_tension, 0, filament_offset[2] - base_height])
+		%bearing_608zz();
+}
+
 module compact_extruder()
 {
 	// motor plate
@@ -420,9 +501,20 @@ module compact_extruder()
 		%translate(filament_offset - [0, 0, epsilon])
 			rotate([90, 0, 0])
 				cylinder(r = filament_diameter / 2, h = 100, $fn = 16, center = true);
+
+	// bowden tube
+	color("white")
+		%translate([0, 30, 0])
+		translate(filament_offset - [0, 0, epsilon])
+			rotate([90, 0, 0])
+				cylinder(r = bowden_outer_diameter / 2, h = 20, $fn = 16, center = true);
 }
 
 compact_extruder();
+
 translate([20, 0, 0])
 	idler_608();
-	
+
+translate([0, 20, 0])
+mirror([1, -1, 0])
+	clamp_bowden();
